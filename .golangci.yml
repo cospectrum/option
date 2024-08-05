@@ -1,0 +1,73 @@
+run:
+  tests: true
+  modules-download-mode: readonly
+
+linters:
+  enable-all: true
+  disable:
+    - thelper
+    - tparallel
+    - gofumpt # can be outdated
+    - ireturn
+    - mnd
+    - execinquery
+    - gomnd
+    - wsl
+    - wrapcheck
+    - varnamelen
+    - testifylint
+    - nlreturn
+    - paralleltest
+    - gochecknoglobals
+    - lll
+    - exhaustive
+    - exhaustruct
+    - depguard
+    - gci
+    - tagliatelle
+    - nonamedreturns
+    - perfsprint
+    - err113
+    - nolintlint
+    - tagalign
+    - godox
+    - godot
+    - funlen
+    - forbidigo
+    - testpackage
+
+linters-settings:
+  revive:
+    rules:
+      - name: unexported-return
+        disabled: true
+
+  gocritic:
+    enabled-tags:
+      - diagnostic
+      - experimental
+      - opinionated
+      - performance
+      - style
+    disabled-checks:
+      - whyNoLint
+      - commentFormatting
+      - commentedOutImport
+      - commentedOutCode
+      - todoCommentWithoutDetail
+      - rangeValCopy
+      - hugeParam
+
+  errcheck:
+    # Report about not checking of errors in type assertions: `a := b.(MyStruct)`.
+    # Such cases aren't reported by default.
+    # Default: false
+    check-type-assertions: true
+    # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`.
+    # Such cases aren't reported by default.
+    # Default: false
+    check-blank: true
+
+  gosec:
+    excludes:
+      - G107  # Url provided to HTTP request as taint input
