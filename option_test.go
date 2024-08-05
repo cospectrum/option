@@ -122,21 +122,25 @@ func TestReadme(t *testing.T) {
 	}
 
 	var u U
-	json.Unmarshal([]byte(`{"num": null}`), &u)
+	err = json.Unmarshal([]byte(`{"num": null}`), &u)
 	// => U{Num: option.None()}
+	assert.NoError(t, err)
 	assert.True(t, u.Num.IsNone())
 
-	json.Unmarshal([]byte(`{}`), &u)
+	err = json.Unmarshal([]byte(`{}`), &u)
 	// => U{Num: option.None()}
+	assert.NoError(t, err)
 	assert.True(t, u.Num.IsNone())
 
-	json.Unmarshal([]byte(`{"num": 0}`), &u)
+	err = json.Unmarshal([]byte(`{"num": 0}`), &u)
 	// => U{Num: option.Some(0)}
+	assert.NoError(t, err)
 	assert.Equal(t, 0, u.Num.Unwrap())
 
-	json.Unmarshal([]byte(`{"num": 3}`), &u)
-	assert.Equal(t, 3, u.Num.Unwrap())
+	err = json.Unmarshal([]byte(`{"num": 3}`), &u)
 	// => U{Num: option.Some(3)}
+	assert.NoError(t, err)
+	assert.Equal(t, 3, u.Num.Unwrap())
 }
 
 func TestJSON(t *testing.T) {
