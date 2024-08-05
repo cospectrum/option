@@ -65,3 +65,27 @@ func TestTake(t *testing.T) {
 
 	assert.True(t, other.Unwrap() == val)
 }
+
+func TestClone(t *testing.T) {
+	t.Parallel()
+	const val = 3
+
+	opt := option.Some(val)
+
+	clone := opt.Clone()
+	_ = clone.Take()
+	assert.True(t, clone.IsNone())
+
+	assert.Equal(t, opt.Unwrap(), val)
+}
+
+func TestUnwrapOrDefault(t *testing.T) {
+	t.Parallel()
+	const (
+		val  = -1
+		zero = 0
+	)
+
+	assert.Equal(t, zero, option.None[int]().UnwrapOrDefault())
+	assert.NotEqual(t, zero, option.Some(val).UnwrapOrDefault())
+}

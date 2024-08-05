@@ -20,6 +20,7 @@ func (opt Option[T]) IsSome() bool {
 	return !opt.IsNone()
 }
 
+// If option has value, run first function, else run second function.
 func Match[T any, U any](opt Option[T], some func(T) U, none func() U) U {
 	if opt.IsSome() {
 		return some(opt.Unwrap())
