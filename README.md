@@ -17,7 +17,6 @@ Requires Go version `1.22.0` or greater.
 ## Usage
 ```go
 import (
-	"errors"
 	"fmt"
 
 	"github.com/cospectrum/option"
@@ -26,7 +25,7 @@ import (
 func main()
 	divide := func(numerator, denominator float64) option.Option[float64] {
 		if denominator == 0.0 {
-			return nil // same as option.None[float64]()
+			return option.None[float64]()
 		}
 		return option.Some(numerator / denominator)
 	}
@@ -35,17 +34,14 @@ func main()
 	result := divide(2.0, 3.0)
 
 	// Pattern match to retrieve the value
-	err := option.Match(result,
-		func(val float64) error {
+	result.Match(
+		func(val float64) {
 			fmt.Printf("Result: %v\n", val)
-			return nil
 		},
-		func() error {
-			return errors.New("Cannot divide by 0")
-		})
-	if err != nil {
-		panic(err)
-	}
+		func() {
+			fmt.Println("Cannot divide by 0")
+		},
+	)
 }
 ```
 

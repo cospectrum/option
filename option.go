@@ -6,28 +6,42 @@ import (
 	"fmt"
 )
 
-type Option[T any] []T
+type Option[T any] struct {
+	some bool
+	val  T
+}
 
 func Some[T any](val T) Option[T] {
-	return Option[T]{val}
+	return Option[T]{
+		some: true,
+		val:  val,
+	}
 }
 
 func None[T any]() Option[T] {
-	return nil
+	return Option[T]{}
 }
 
 // Returns true if the option has a value.
 func (opt Option[T]) IsSome() bool {
-	return !opt.IsNone()
+	return opt.some
 }
 
-// If option has value, return result of the first function,
-// else return result of the second function.
+// If option has a value, returns result of the first function,
+// else returns result of the second function.
 func Match[T, U any](opt Option[T], some func(T) U, none func() U) U {
 	if opt.IsSome() {
 		return some(opt.Unwrap())
 	}
 	return none()
+}
+
+// If option has a value, calls the first function, else calls the second function.
+func (opt Option[T]) Match(some func(T), none func()) {
+	if opt.IsSome() {
+		some(opt.Unwrap())
+	}
+	none()
 }
 
 // Returns true if the option has a value and the value matches a predicate.
@@ -40,7 +54,7 @@ func (opt Option[T]) IsSomeAnd(f func(T) bool) bool {
 
 // Returns true if the option has no value.
 func (opt Option[T]) IsNone() bool {
-	return len(opt) == 0
+	return !opt.IsSome()
 }
 
 // Returns the contained value.
@@ -49,7 +63,7 @@ func (opt Option[T]) Expect(msg string) T {
 	if opt.IsNone() {
 		panic(msg)
 	}
-	return opt[0]
+	return opt.val
 }
 
 // Returns the contained value.
@@ -94,7 +108,7 @@ func (opt *Option[T]) Take() Option[T] {
 		*opt = None[T]()
 		return Some(val)
 	}
-	return nil
+	return None[T]()
 }
 
 func (opt Option[T]) Clone() Option[T] {

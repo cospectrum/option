@@ -2,27 +2,12 @@ package option_test
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/cospectrum/option"
 	"github.com/stretchr/testify/assert"
 )
-
-func TestNil(t *testing.T) {
-	t.Parallel()
-
-	var none option.Option[int]
-	assert.True(t, none == nil)
-
-	assert.True(t, option.None[int]() == nil)
-	assert.True(t, option.Some(0) != nil)
-
-	// :(
-	opt := option.Option[int]{}
-	assert.True(t, opt != nil)
-}
 
 func TestIsNone(t *testing.T) {
 	t.Parallel()
@@ -96,7 +81,7 @@ func TestUnwrapOrDefault(t *testing.T) {
 func TestReadme(t *testing.T) {
 	divide := func(numerator, denominator float64) option.Option[float64] {
 		if denominator == 0.0 {
-			return nil // same as option.None[float64]()
+			return option.None[float64]()
 		}
 		return option.Some(numerator / denominator)
 	}
@@ -105,24 +90,20 @@ func TestReadme(t *testing.T) {
 	result := divide(2.0, 3.0)
 
 	// Pattern match to retrieve the value
-	err := option.Match(result,
-		func(val float64) error {
+	result.Match(
+		func(val float64) {
 			fmt.Printf("Result: %v\n", val)
-			return nil
 		},
-		func() error {
-			return errors.New("Cannot divide by 0")
-		})
-	if err != nil {
-		panic(err)
-	}
-
+		func() {
+			fmt.Println("Cannot divide by 0")
+		},
+	)
 	type U struct {
 		Num option.Option[int] `json:"num"`
 	}
 
 	var u U
-	err = json.Unmarshal([]byte(`{"num": null}`), &u)
+	err := json.Unmarshal([]byte(`{"num": null}`), &u)
 	// => U{Num: option.None()}
 	assert.NoError(t, err)
 	assert.True(t, u.Num.IsNone())
@@ -180,7 +161,6 @@ func TestJSON(t *testing.T) {
 
 	vals := []T{
 		{},
-		{Num: nil},
 		{Num: option.None[int]()},
 		{Num: option.Some(0)},
 		{Num: option.Some(3)},
