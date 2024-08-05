@@ -48,3 +48,16 @@ func main()
 	}
 }
 ```
+
+### JSON
+```go
+type U struct {
+	Num option.Option[int] `json:"num"`
+}
+
+var u U
+json.Unmarshal([]byte(`{"num": null}`), &u) // => U{Num: option.None()}
+json.Unmarshal([]byte(`{}`), &u) // => U{Num: option.None()}
+json.Unmarshal([]byte(`{"num": 0}`), &u) // => U{Num: option.Some(0)}
+json.Unmarshal([]byte(`{"num": 3}`), &u) // => U{Num: option.Some(3)}
+```

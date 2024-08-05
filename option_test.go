@@ -116,31 +116,81 @@ func TestReadme(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+
+	type U struct {
+		Num option.Option[int] `json:"num"`
+	}
+
+	var u U
+	json.Unmarshal([]byte(`{"num": null}`), &u)
+	// => U{Num: option.None()}
+	assert.True(t, u.Num.IsNone())
+
+	json.Unmarshal([]byte(`{}`), &u)
+	// => U{Num: option.None()}
+	assert.True(t, u.Num.IsNone())
+
+	json.Unmarshal([]byte(`{"num": 0}`), &u)
+	// => U{Num: option.Some(0)}
+	assert.Equal(t, 0, u.Num.Unwrap())
+
+	json.Unmarshal([]byte(`{"num": 3}`), &u)
+	assert.Equal(t, 3, u.Num.Unwrap())
+	// => U{Num: option.Some(3)}
 }
 
 func TestJSON(t *testing.T) {
 	type T struct {
-		Value option.Option[int] `json:"dt"`
+		Num option.Option[int] `json:"num"`
 	}
 	var ty T
 
-	s := `{"dt": null}`
+	s := `{"num": null}`
 	err := json.Unmarshal([]byte(s), &ty)
 	assert.NoError(t, err)
-	assert.True(t, ty.Value.IsNone())
+	assert.True(t, ty.Num.IsNone())
 
 	s = `{}`
 	err = json.Unmarshal([]byte(s), &ty)
 	assert.NoError(t, err)
-	assert.True(t, ty.Value.IsNone())
+	assert.True(t, ty.Num.IsNone())
 
-	s = `{"dt": 0}`
+	s = `{"num": 0}`
 	err = json.Unmarshal([]byte(s), &ty)
 	assert.NoError(t, err)
-	assert.Equal(t, 0, ty.Value.Unwrap())
+	assert.Equal(t, 0, ty.Num.Unwrap())
 
-	s = `{"dt": 3}`
+	s = `{"num": 3}`
 	err = json.Unmarshal([]byte(s), &ty)
 	assert.NoError(t, err)
-	assert.Equal(t, 3, ty.Value.Unwrap())
+	assert.Equal(t, 3, ty.Num.Unwrap())
+
+	id := func(ty T) T {
+		b, err := json.Marshal(ty)
+		assert.NoError(t, err)
+
+		var out T
+		assert.NoError(t, json.Unmarshal(b, &out))
+		return out
+	}
+
+	vals := []T{
+		{},
+		{Num: nil},
+		{Num: option.None[int]()},
+		{Num: option.Some(0)},
+		{Num: option.Some(3)},
+	}
+	for _, val := range vals {
+		newVal := id(val)
+		assert.Equal(t, val, newVal)
+
+		if val.Num.IsSome() {
+			assert.Equal(t, val.Num.Unwrap(), newVal.Num.Unwrap())
+			continue
+		}
+
+		assert.True(t, val.Num.IsNone())
+		assert.True(t, newVal.Num.IsNone())
+	}
 }
