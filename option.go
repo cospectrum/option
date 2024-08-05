@@ -3,6 +3,7 @@ package option
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 )
 
 type Option[T any] []T
@@ -20,8 +21,9 @@ func (opt Option[T]) IsSome() bool {
 	return !opt.IsNone()
 }
 
-// If option has value, run first function, else run second function.
-func Match[T any, U any](opt Option[T], some func(T) U, none func() U) U {
+// If option has value, return result of the first function,
+// else return result of the second function.
+func Match[T, U any](opt Option[T], some func(T) U, none func() U) U {
 	if opt.IsSome() {
 		return some(opt.Unwrap())
 	}
@@ -100,6 +102,19 @@ func (opt Option[T]) Clone() Option[T] {
 		return Some(opt.Unwrap())
 	}
 	return None[T]()
+}
+
+var _ fmt.Stringer = Option[int]{}
+
+func (opt Option[T]) String() string {
+	if opt.IsNone() {
+		return "option.None()"
+	}
+	val := opt.Unwrap()
+	if stringer, ok := any(val).(fmt.Stringer); ok {
+		return fmt.Sprintf("option.Some(%s)", stringer)
+	}
+	return fmt.Sprintf("option.Some(%+v)", val)
 }
 
 var (
