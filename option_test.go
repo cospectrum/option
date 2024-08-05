@@ -1,6 +1,7 @@
 package option_test
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
@@ -115,4 +116,31 @@ func TestReadme(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func TestJSON(t *testing.T) {
+	type T struct {
+		Value option.Option[int] `json:"dt"`
+	}
+	var ty T
+
+	s := `{"dt": null}`
+	err := json.Unmarshal([]byte(s), &ty)
+	assert.NoError(t, err)
+	assert.True(t, ty.Value.IsNone())
+
+	s = `{}`
+	err = json.Unmarshal([]byte(s), &ty)
+	assert.NoError(t, err)
+	assert.True(t, ty.Value.IsNone())
+
+	s = `{"dt": 0}`
+	err = json.Unmarshal([]byte(s), &ty)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, ty.Value.Unwrap())
+
+	s = `{"dt": 3}`
+	err = json.Unmarshal([]byte(s), &ty)
+	assert.NoError(t, err)
+	assert.Equal(t, 3, ty.Value.Unwrap())
 }
